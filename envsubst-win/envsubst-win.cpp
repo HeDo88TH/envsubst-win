@@ -41,8 +41,6 @@ int main(int argc, char* argv[], char* envp[])
 	int index = 0;
 	while (envp[index]) {
 
-		//std::cout << envp[index++] << std::endl;
-
 		const auto env = std::string(envp[index++]);
 
 		const auto pos = env.find('=');
