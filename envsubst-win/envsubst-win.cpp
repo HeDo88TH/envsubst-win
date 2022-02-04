@@ -16,6 +16,23 @@ void ReplaceStringInPlace(std::string& subject, const std::string& search,
 	}
 }
 
+// Credit https://www.techiedelight.com/trim-string-cpp-remove-leading-trailing-spaces/
+std::string ltrim(const std::string& s, const std::string& chars)
+{
+	const size_t start = s.find_first_not_of(chars);
+	return start == std::string::npos ? "" : s.substr(start);
+}
+
+std::string rtrim(const std::string& s, const std::string& chars)
+{
+	const size_t end = s.find_last_not_of(chars);
+	return end == std::string::npos ? "" : s.substr(0, end + 1);
+}
+
+std::string trim(const std::string& s, const std::string& chars) {
+	return rtrim(ltrim(s, chars), chars);
+}
+
 int main(int argc, char* argv[], char* envp[])
 {
 
@@ -47,10 +64,10 @@ int main(int argc, char* argv[], char* envp[])
 
 		const auto pos = env.find('=');
 		const auto key = env.substr(0, pos);
-		const auto value = env.substr(pos + 1);
+		const auto value = trim(env.substr(pos + 1), "\"");
 
-#ifdef DEBUG
-		std::cout << key << " = " << value << std::endl;
+#ifdef _DEBUG
+		std::cout << key << " = \"" << value << '\"' << std::endl;
 #endif
 
 		const auto findstr = "$" + key;
