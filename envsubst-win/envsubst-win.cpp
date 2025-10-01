@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <fstream>
 #include <regex>
+#include <vector>
+#include <algorithm>
 
 namespace fs = std::filesystem;
 
@@ -57,24 +59,29 @@ int main(int argc, char* argv[], char* envp[])
 	std::string content((std::istreambuf_iterator<char>(input)),(std::istreambuf_iterator<char>()));
 	input.close();
 
-	int index = 0;
-	while (envp[index]) {
+        std::vector<std::pair<std::string, std::string>> envs;
 
-		const auto env = std::string(envp[index++]);
+        int index = 0;
+        while (envp[index]) {
+                const auto env = std::string(envp[index++]);
+                const auto pos = env.find('=');
+                const auto key = env.substr(0, pos);
+                if (key.empty()) continue;
+                const auto value = trim(env.substr(pos + 1), "\"");
+                envs.emplace_back(key, value);
+        }
 
-		const auto pos = env.find('=');
-		const auto key = env.substr(0, pos);
-		const auto value = trim(env.substr(pos + 1), "\"");
+        std::sort(envs.begin(), envs.end(), [](const auto& a, const auto& b) {
+                return a.first.size() > b.first.size();
+        });
 
+        for (const auto& [key, value] : envs) {
 #ifdef _DEBUG
-		std::cout << key << " = \"" << value << '\"' << std::endl;
+                std::cout << key << " = \"" << value << '\"' << std::endl;
 #endif
-
-		const auto findstr = "$" + key;
-				
-		ReplaceStringInPlace(content, findstr, value);
-		
-	}
+                const auto findstr = "$" + key;
+                ReplaceStringInPlace(content, findstr, value);
+        }
 
 	std::ofstream out(dest);
 	out << content;
